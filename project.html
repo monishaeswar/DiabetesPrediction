@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>AI-Powered Diabetes Predictor</title>
+<style>
+  /* Reset/normalize */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #3a8dff 0%, #3a63ff 100%);
+    color: #fff;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+  }
+  .container {
+    background: #1b2a59;
+    padding: 20px 25px 30px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.3);
+  }
+  h1 {
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    text-align: center;
+    letter-spacing: 0.02em;
+  }
+  p.subtitle {
+    font-weight: 400;
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 25px;
+    color: #b8c1da;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #d0d8ff;
+  }
+  input[type="number"] {
+    padding: 10px 12px;
+    margin-bottom: 18px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+    transition: box-shadow 0.3s ease;
+  }
+  input[type="number"]:focus {
+    box-shadow: 0 0 6px 2px #3a8dff;
+  }
+  button {
+    background: #3a8dff;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+  }
+  button:hover {
+    background: #295ed9;
+  }
+  .result {
+    margin-top: 22px;
+    padding: 15px;
+    font-size: 1.1rem;
+    text-align: center;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+  .result.positive {
+    background-color: #d94e4e;
+    color: #ffdddd;
+  }
+  .result.negative {
+    background-color: #4ed967;
+    color: #ddffdd;
+  }
+  .footer {
+    margin-top: 30px;
+    font-size: 0.8rem;
+    text-align: center;
+    color: #a0a7c1;
+  }
+  @media (max-width: 400px) {
+    .container {
+      max-width: 100%;
+      padding: 15px 18px 24px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container" role="main" aria-labelledby="appTitle">
+  <h1 id="appTitle">Diabetes Disease Predictor</h1>
+  <p class="subtitle">AI-powered prediction based on patient data</p>
+  <form id="predictForm" novalidate>
+    <label for="pregnancies">Pregnancies</label>
+    <input type="number" id="pregnancies" name="pregnancies" min="0" max="20" step="1" required inputmode="numeric" aria-required="true" aria-describedby="pregnanciesDesc" />
+    <div id="pregnanciesDesc" class="sr-only">Number of times pregnant, integer 0-20</div>
+    
+    <label for="glucose">Glucose Level (mg/dL)</label>
+    <input type="number" id="glucose" name="glucose" min="0" max="250" step="any" required inputmode="decimal" aria-required="true" aria-describedby="glucoseDesc" />
+    <div id="glucoseDesc" class="sr-only">Plasma glucose concentration a 2 hours in an oral glucose tolerance test, 0-250</div>
+    
+    <label for="bloodpressure">Blood Pressure (mm Hg)</label>
+    <input type="number" id="bloodpressure" name="bloodpressure" min="0" max="140" step="any" required inputmode="decimal" aria-required="true" aria-describedby="bpDesc" />
+    <div id="bpDesc" class="sr-only">Diastolic blood pressure (mm Hg), 0-140</div>
+    
+    <label for="skinthickness">Skin Thickness (mm)</label>
+    <input type="number" id="skinthickness" name="skinthickness" min="0" max="100" step="any" required inputmode="decimal" aria-required="true" aria-describedby="skinDesc" />
+    <div id="skinDesc" class="sr-only">Triceps skin fold thickness (mm), 0-100</div>
+    
+    <label for="insulin">Insulin (mu U/ml)</label>
+    <input type="number" id="insulin" name="insulin" min="0" max="900" step="any" required inputmode="decimal" aria-required="true" aria-describedby="insulinDesc" />
+    <div id="insulinDesc" class="sr-only">2-Hour serum insulin (mu U/ml), 0-900</div>
+    
+    <label for="bmi">BMI (Body Mass Index)</label>
+    <input type="number" id="bmi" name="bmi" min="0" max="70" step="0.1" required inputmode="decimal" aria-required="true" aria-describedby="bmiDesc" />
+    <div id="bmiDesc" class="sr-only">Body mass index (weight in kg/(height in m)^2), 0 to 70</div>
+    
+    <label for="dpf">Diabetes Pedigree Function</label>
+    <input type="number" id="dpf" name="dpf" min="0" max="3" step="0.001" required inputmode="decimal" aria-required="true" aria-describedby="dpfDesc" />
+    <div id="dpfDesc" class="sr-only">Diabetes pedigree function, a function which scores likelihood of diabetes based on family history, 0 to 3</div>
+    
+    <label for="age">Age (years)</label>
+    <input type="number" id="age" name="age" min="10" max="120" step="1" required inputmode="numeric" aria-required="true" aria-describedby="ageDesc" />
+    <div id="ageDesc" class="sr-only">Age in years, 10-120</div>
+    
+    <button type="submit" aria-label="Predict diabetes risk">Predict</button>
+  </form>
+  <div id="result" role="alert" aria-live="polite"></div>
+  <p class="footer">Dataset: Pima Indians Diabetes Database</p>
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    // Logistic regression coefficients - approximate example values from Pima dataset training
+    const coefficients = {
+      pregnancies: 0.12,
+      glucose: 0.04,
+      bloodpressure: -0.02,
+      skinthickness: 0.01,
+      insulin: -0.001,
+      bmi: 0.06,
+      dpf: 0.9,
+      age: 0.03,
+      intercept: -5.0
+    };
+
+    const form = document.getElementById('predictForm');
+    const resultDiv = document.getElementById('result');
+
+    // Sigmoid function
+    function sigmoid(z) {
+      return 1 / (1 + Math.exp(-z));
+    }
+
+    // Validate input values and return them as a numbers object or throw error with message
+    function getInputs() {
+      const data = {};
+      // Pregnancies (int 0-20)
+      const preg = parseInt(form.pregnancies.value, 10);
+      if (isNaN(preg) || preg < 0 || preg > 20) throw new Error('Pregnancies must be an integer between 0 and 20.');
+      data.pregnancies = preg;
+
+      // Glucose (0-250)
+      const gluc = parseFloat(form.glucose.value);
+      if (isNaN(gluc) || gluc <= 0 || gluc > 250) throw new Error('Glucose level must be a positive number up to 250.');
+      data.glucose = gluc;
+
+      // Blood Pressure (0-140)
+      const bp = parseFloat(form.bloodpressure.value);
+      if (isNaN(bp) || bp <= 0 || bp > 140) throw new Error('Blood pressure must be a positive number up to 140.');
+      data.bloodpressure = bp;
+
+      // Skin Thickness (0-100)
+      const skin = parseFloat(form.skinthickness.value);
+      if (isNaN(skin) || skin < 0 || skin > 100) throw new Error('Skin thickness must be between 0 and 100.');
+      data.skinthickness = skin;
+
+      // Insulin (0-900)
+      const insulin = parseFloat(form.insulin.value);
+      if (isNaN(insulin) || insulin < 0 || insulin > 900) throw new Error('Insulin must be between 0 and 900.');
+      data.insulin = insulin;
+
+      // BMI (0-70)
+      const bmi = parseFloat(form.bmi.value);
+      if (isNaN(bmi) || bmi <= 0 || bmi > 70) throw new Error('BMI must be a positive number up to 70.');
+      data.bmi = bmi;
+
+      // Diabetes Pedigree Function (0-3)
+      const dpf = parseFloat(form.dpf.value);
+      if (isNaN(dpf) || dpf < 0 || dpf > 3) throw new Error('Diabetes Pedigree Function must be between 0 and 3.');
+      data.dpf = dpf;
+
+      // Age (10-120)
+      const age = parseInt(form.age.value, 10);
+      if (isNaN(age) || age < 10 || age > 120) throw new Error('Age must be an integer between 10 and 120.');
+      data.age = age;
+
+      return data;
+    }
+
+    // Calculate prediction probability given data
+    function predict(data) {
+      let z = coefficients.intercept;
+      z += coefficients.pregnancies * data.pregnancies;
+      z += coefficients.glucose * data.glucose;
+      z += coefficients.bloodpressure * data.bloodpressure;
+      z += coefficients.skinthickness * data.skinthickness;
+      z += coefficients.insulin * data.insulin;
+      z += coefficients.bmi * data.bmi;
+      z += coefficients.dpf * data.dpf;
+      z += coefficients.age * data.age;
+      return sigmoid(z);
+    }
+
+    // Handle form submission
+    form.addEventListener('submit', function(event) {
+      event.preventDefault();
+      resultDiv.textContent = '';
+      resultDiv.className = '';
+      try {
+        const inputData = getInputs();
+        const probability = predict(inputData);
+        const percentage = (probability * 100).toFixed(1);
+
+        if (probability >= 0.5) {
+          resultDiv.textContent = `⚠️ High risk of diabetes detected (${percentage}%). Please consult a healthcare professional.`;
+          resultDiv.classList.add('result', 'positive');
+        } else {
+          resultDiv.textContent = `✅ Low risk of diabetes (${percentage}%). Keep up a healthy lifestyle!`;
+          resultDiv.classList.add('result', 'negative');
+        }
+      } catch (err) {
+        resultDiv.textContent = err.message;
+        resultDiv.classList.add('result', 'positive');
+      }
+    });
+  })();
+</script>
+
+<!-- Accessibility helper -->
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap; /* added line */
+    border: 0;
+  }
+</style>
+
+</body>
+</html>
+</content>
+</create_file>

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>AI-powered Diabetes Prediction</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap');
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    margin: 0;
+    padding: 20px;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+  }
+  .container {
+    background: #1c1c2e;
+    border-radius: 15px;
+    padding: 20px 30px;
+    max-width: 350px;
+    width: 100%;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+  }
+  h1 {
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  p.description {
+    font-weight: 400;
+    font-size: 0.9rem;
+    margin-bottom: 25px;
+    text-align: center;
+    color: #d1d1d1;
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  input[type="number"] {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 400;
+    outline: none;
+    transition: box-shadow 0.3s ease;
+  }
+  input[type="number"]:focus {
+    box-shadow: 0 0 8px #2575fc;
+  }
+  button {
+    margin-top: 10px;
+    background: #2575fc;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 12px 0;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  button:hover {
+    background: #6a11cb;
+  }
+  .result {
+    margin-top: 20px;
+    background: #33334d;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  /* Responsive for mobile */
+  @media (max-width: 400px) {
+    body {
+      padding: 12px;
+    }
+    .container {
+      padding: 15px 20px;
+      max-width: 100%;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container" role="main">
+  <h1>Diabetes Risk Predictor</h1>
+  <p class="description">Enter your health data below to get an AI-powered diabetes risk prediction.</p>
+  <form id="diabetes-form" aria-label="Pima Indians Diabetes data input form">
+    <label for="pregnancies">Number of pregnancies</label>
+    <input type="number" id="pregnancies" name="pregnancies" min="0" max="20" step="1" required aria-required="true" />
+
+    <label for="glucose">Plasma glucose concentration (mg/dL)</label>
+    <input type="number" id="glucose" name="glucose" min="0" max="300" step="1" required aria-required="true" />
+
+    <label for="bloodpressure">Diastolic blood pressure (mm Hg)</label>
+    <input type="number" id="bloodpressure" name="bloodpressure" min="0" max="150" step="1" required aria-required="true" />
+
+    <label for="skinthickness">Triceps skin fold thickness (mm)</label>
+    <input type="number" id="skinthickness" name="skinthickness" min="0" max="100" step="1" required aria-required="true" />
+
+    <label for="insulin">2-Hour serum insulin (mu U/ml)</label>
+    <input type="number" id="insulin" name="insulin" min="0" max="900" step="1" required aria-required="true" />
+
+    <label for="bmi">Body mass index (BMI)</label>
+    <input type="number" id="bmi" name="bmi" min="0" max="70" step="0.1" required aria-required="true" />
+
+    <label for="dpf">Diabetes pedigree function</label>
+    <input type="number" id="dpf" name="dpf" min="0" max="3" step="0.001" required aria-required="true" />
+
+    <label for="age">Age (years)</label>
+    <input type="number" id="age" name="age" min="1" max="120" step="1" required aria-required="true" />
+
+    <button type="submit" aria-label="Predict diabetes risk">Predict</button>
+  </form>
+  <div class="result" id="result" aria-live="polite" aria-atomic="true" style="display:none;"></div>
+</div>
+
+<script>
+  // Logistic regression model parameters learned from the Pima dataset (example)
+  // Coefficients correspond to [pregnancies, glucose, bloodpressure, skinthickness, insulin, bmi, dpf, age]
+  // Intercept term included
+  const modelCoefficients = {
+    intercept: -8.404,
+    weights: [0.123, 0.035, -0.012, 0.004, -0.001, 0.095, 2.555, 0.017]
+  };
+
+  // Sigmoid function
+  function sigmoid(z) {
+    return 1 / (1 + Math.exp(-z));
+  }
+
+  // Prediction function using logistic regression
+  function predictDiabetes(features) {
+    let z = modelCoefficients.intercept;
+    for (let i = 0; i < features.length; i++) {
+      z += features[i] * modelCoefficients.weights[i];
+    }
+    const probability = sigmoid(z);
+    return probability;
+  }
+
+  // Form handling
+  const form = document.getElementById('diabetes-form');
+  const resultDiv = document.getElementById('result');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    // Extract input values as floats
+    const pregnancies = parseFloat(form.pregnancies.value);
+    const glucose = parseFloat(form.glucose.value);
+    const bloodpressure = parseFloat(form.bloodpressure.value);
+    const skinthickness = parseFloat(form.skinthickness.value);
+    const insulin = parseFloat(form.insulin.value);
+    const bmi = parseFloat(form.bmi.value);
+    const dpf = parseFloat(form.dpf.value);
+    const age = parseFloat(form.age.value);
+
+    const inputFeatures = [pregnancies, glucose, bloodpressure, skinthickness, insulin, bmi, dpf, age];
+
+    // Validate inputs (simple example, inputs are required and in min max so form validation assures basic correctness)
+
+    // Compute prediction
+    const predictionProb = predictDiabetes(inputFeatures);
+
+    // Classify based on threshold 0.5
+    const diabetic = predictionProb >= 0.5;
+
+    // Build result message
+    const probPercent = (predictionProb * 100).toFixed(1);
+    let message = `Prediction: You are <strong>${diabetic ? 'likely' : 'unlikely'}</strong> to have diabetes.<br>`;
+    message += `Risk probability: <strong>${probPercent}%</strong>.`;
+
+    resultDiv.innerHTML = message;
+    resultDiv.style.display = 'block';
+
+    // Accessibility: Focus the result
+    resultDiv.focus();
+  });
+</script>
+</body>
+</html>
+</content>
+</create_file>
